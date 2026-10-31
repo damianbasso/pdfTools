@@ -1,0 +1,56 @@
+<section class="tool" [attr.aria-busy]="busy()">
+  <header class="tool-head">
+    <h1>Images to PDF</h1>
+    <p class="lead">
+      Turn JPEG and TIFF files into one PDF. Upright JPEGs are embedded as-is. TIFF pages, and JPEGs
+      that are stored sideways, are flattened onto white.
+    </p>
+  </header>
+
+  <app-drop-zone
+    [accept]="accept"
+    title="Drop JPEG and TIFF files"
+    hint="They are placed in order, one PDF page per image frame"
+    [disabled]="busy()"
+    (chosen)="add($event)"
+  />
+
+  <app-segmented
+    label="Page size"
+    [options]="papers"
+    [value]="paper()"
+    (picked)="setPaper($event)"
+  />
+
+  @if (files().length) {
+    <div class="queue-head">
+      <p>{{ files().length === 1 ? '1 file' : files().length + ' files' }}</p>
+      <button type="button" class="textish" [disabled]="busy()" (click)="clear()">Clear</button>
+    </div>
+    <app-file-queue
+      [rows]="rows()"
+      [dragDisabled]="busy()"
+      (removed)="remove($event)"
+      (moved)="move($event)"
+      (reordered)="reorder($event)"
+    />
+  }
+
+  <app-action-bar
+    label="Download PDF"
+    extension=".pdf"
+    fallback="images.pdf"
+    [busy]="busy()"
+    [disabled]="!canRun()"
+    [progress]="progress()"
+    [hint]="hint()"
+    (requested)="run($event)"
+  />
+
+  @if (error()) {
+    <p class="alert" role="alert">{{ error() }}</p>
+  }
+  @if (ready(); as file) {
+    <a class="save-link" [href]="file.url" [download]="file.name">Save {{ file.name }} again</a>
+  }
+</section>

@@ -1,0 +1,49 @@
+<section class="tool" [attr.aria-busy]="busy()">
+  <header class="tool-head">
+    <h1>Combine into a TIFF</h1>
+    <p class="lead">
+      Stack separate TIFF files into one multi-page TIFF. JPEG files can be mixed in and become
+      extra pages. Pages stay in the order shown.
+    </p>
+  </header>
+
+  <app-drop-zone
+    [accept]="accept"
+    title="Drop TIFF and JPEG files"
+    hint="Pages are appended in the order you arrange"
+    [disabled]="busy()"
+    (chosen)="add($event)"
+  />
+
+  @if (files().length) {
+    <div class="queue-head">
+      <p>{{ files().length === 1 ? '1 file' : files().length + ' files' }}</p>
+      <button type="button" class="textish" [disabled]="busy()" (click)="clear()">Clear</button>
+    </div>
+    <app-file-queue
+      [rows]="rows()"
+      [dragDisabled]="busy()"
+      (removed)="remove($event)"
+      (moved)="move($event)"
+      (reordered)="reorder($event)"
+    />
+  }
+
+  <app-action-bar
+    label="Download TIFF"
+    extension=".tif"
+    fallback="combined.tif"
+    [busy]="busy()"
+    [disabled]="!canRun()"
+    [progress]="progress()"
+    [hint]="hint()"
+    (requested)="run($event)"
+  />
+
+  @if (error()) {
+    <p class="alert" role="alert">{{ error() }}</p>
+  }
+  @if (ready(); as file) {
+    <a class="save-link" [href]="file.url" [download]="file.name">Save {{ file.name }} again</a>
+  }
+</section>

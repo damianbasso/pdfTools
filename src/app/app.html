@@ -1,0 +1,31 @@
+<div class="app">
+  <header class="topbar">
+    <a class="brand" routerLink="/merge">
+      <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
+        <rect width="32" height="32" rx="8"></rect>
+        <path d="M9 8h10v14H9zM13 12h10v14H13z"></path>
+      </svg>
+      <span>
+        <span class="brand-name">pdfTools</span>
+        <span class="brand-detail">Local file editor</span>
+      </span>
+    </a>
+    <p class="privacy">Files stay in this browser.<br />Nothing is uploaded.</p>
+  </header>
+
+  <div class="frame">
+    <nav class="nav" aria-label="Tools">
+      @for (tool of tools; track tool.path) {
+        <a [routerLink]="tool.path" routerLinkActive="active">
+          <span class="tool-index">{{ tool.index }}</span>
+          <span class="tool-name">{{ tool.name }}</span>
+          <span class="tool-detail">{{ tool.detail }}</span>
+        </a>
+      }
+    </nav>
+    <main class="sheet">
+      <router-outlet />
+    </main>
+  </div>
+  <p class="footer">Processed locally in this tab. Close the tab and the files are gone.</p>
+</div>

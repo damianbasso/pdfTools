@@ -1,0 +1,116 @@
+<section class="tool" [attr.aria-busy]="busy()">
+  <header class="tool-head">
+    <h1>Split a PDF</h1>
+    <p class="lead">
+      Save every page on its own, cut the file into ranges, or pull specific pages into a new PDF.
+    </p>
+  </header>
+
+  <app-drop-zone
+    [accept]="accept"
+    [multiple]="false"
+    title="Drop a PDF here"
+    hint="One document at a time"
+    [disabled]="busy()"
+    (chosen)="add($event)"
+  />
+
+  @if (file()) {
+    <div class="queue-head">
+      <p>{{ summary() }}</p>
+      <button type="button" class="textish" [disabled]="busy()" (click)="clear()">Remove</button>
+    </div>
+
+    <app-segmented
+      label="Split method"
+      [options]="modes"
+      [value]="mode()"
+      (picked)="setMode($event)"
+    />
+
+    @if (mode() === 'ranges') {
+      <label class="stack">
+        <span>Ranges</span>
+        <input
+          type="text"
+          [value]="ranges()"
+          placeholder="1-3, 4-6, 10"
+          spellcheck="false"
+          [disabled]="busy()"
+          (input)="setRanges($event)"
+        />
+      </label>
+    }
+
+    @if (mode() === 'selected' && huge()) {
+      <label class="stack">
+        <span>Pages to keep</span>
+        <input
+          type="text"
+          [value]="manual()"
+          placeholder="1-10, 42"
+          spellcheck="false"
+          [disabled]="busy()"
+          (input)="setManual($event)"
+        />
+      </label>
+    }
+
+    @if (mode() === 'selected' && !huge()) {
+      <div class="queue-head">
+        <p>{{ selected().length ? selected().length + ' selected' : 'No pages selected' }}</p>
+        <div class="row-actions">
+          <button type="button" class="textish" [disabled]="busy()" (click)="selectAll()">
+            Select all
+          </button>
+          <button type="button" class="textish" [disabled]="busy()" (click)="clearSelection()">
+            Clear
+          </button>
+        </div>
+      </div>
+      <div class="page-grid">
+        @for (index of pageIndexes(); track index) {
+          <button
+            type="button"
+            class="page-chip"
+            [class.on]="isSelected(index)"
+            [attr.aria-pressed]="isSelected(index)"
+            [disabled]="busy()"
+            (click)="pick(index, $event)"
+          >
+            {{ index + 1 }}
+          </button>
+        }
+      </div>
+    }
+
+    @if (mode() !== 'selected' && pageCount() <= 600) {
+      <div class="page-grid quiet-grid">
+        @for (index of pageIndexes(); track index) {
+          <div class="page-chip quiet">{{ index + 1 }}</div>
+        }
+      </div>
+    }
+  }
+
+  <app-action-bar
+    label="Download split"
+    extension=".pdf"
+    fallback="split.pdf"
+    [busy]="busy()"
+    [disabled]="!canRun()"
+    [progress]="progress()"
+    [hint]="status().hint"
+    (requested)="run($event)"
+  />
+
+  @if (status().error) {
+    <p class="alert" role="alert">{{ status().error }}</p>
+  }
+  @if (error()) {
+    <p class="alert" role="alert">{{ error() }}</p>
+  }
+  @if (ready(); as saved) {
+    <a class="save-link" [href]="saved.url" [download]="saved.name">Save {{ saved.name }} again</a>
+  }
+</section>

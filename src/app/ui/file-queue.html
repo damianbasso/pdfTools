@@ -1,0 +1,77 @@
+<ol
+  class="queue"
+  cdkDropList
+  [cdkDropListDisabled]="dragDisabled()"
+  (cdkDropListDropped)="dropped($event)"
+>
+  @for (row of rows(); track row.id; let index = $index; let first = $first; let last = $last) {
+    <li class="queue-row" cdkDrag [cdkDragDisabled]="dragDisabled()">
+      <span class="grip" cdkDragHandle aria-hidden="true">
+        <svg viewBox="0 0 12 18" width="12" height="18">
+          <circle cx="3" cy="3" r="1.3"></circle>
+          <circle cx="9" cy="3" r="1.3"></circle>
+          <circle cx="3" cy="9" r="1.3"></circle>
+          <circle cx="9" cy="9" r="1.3"></circle>
+          <circle cx="3" cy="15" r="1.3"></circle>
+          <circle cx="9" cy="15" r="1.3"></circle>
+        </svg>
+      </span>
+      <span class="order">{{ index + 1 }}</span>
+      @if (row.thumbUrl) {
+        <img class="thumb" [src]="row.thumbUrl" alt="" />
+      } @else {
+        <span class="badge">{{ row.badge }}</span>
+      }
+      <div class="row-copy">
+        <span class="file-name">{{ row.name }}</span>
+        <span class="meta">{{ row.badge }} · {{ row.meta }}</span>
+        @if (showPages()) {
+          <label class="pages-field">
+            <span>Pages</span>
+            <input
+              type="text"
+              [value]="row.pages ?? ''"
+              placeholder="all"
+              spellcheck="false"
+              [attr.aria-invalid]="row.pagesError ? true : null"
+              [disabled]="dragDisabled()"
+              (input)="onPages(row.id, $event)"
+            />
+          </label>
+          @if (row.pagesError) {
+            <p class="field-error">{{ row.pagesError }}</p>
+          }
+        }
+      </div>
+      <div class="row-actions">
+        <button
+          type="button"
+          class="textish"
+          [disabled]="first || dragDisabled()"
+          [attr.aria-label]="'Move ' + row.name + ' up'"
+          (click)="moved.emit({ id: row.id, direction: -1 })"
+        >
+          Up
+        </button>
+        <button
+          type="button"
+          class="textish"
+          [disabled]="last || dragDisabled()"
+          [attr.aria-label]="'Move ' + row.name + ' down'"
+          (click)="moved.emit({ id: row.id, direction: 1 })"
+        >
+          Down
+        </button>
+        <button
+          type="button"
+          class="textish danger"
+          [disabled]="dragDisabled()"
+          [attr.aria-label]="'Remove ' + row.name"
+          (click)="removed.emit(row.id)"
+        >
+          Remove
+        </button>
+      </div>
+    </li>
+  }
+</ol>

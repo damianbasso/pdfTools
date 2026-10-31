@@ -1,0 +1,51 @@
+<section class="tool" [attr.aria-busy]="busy()">
+  <header class="tool-head">
+    <h1>Merge PDFs</h1>
+    <p class="lead">
+      Stack documents in the order you want and save them as one PDF. You can limit which pages each
+      file contributes.
+    </p>
+  </header>
+
+  <app-drop-zone
+    [accept]="accept"
+    title="Drop PDFs here"
+    hint="or click to choose files"
+    [disabled]="busy()"
+    (chosen)="add($event)"
+  />
+
+  @if (files().length) {
+    <div class="queue-head">
+      <p>{{ files().length === 1 ? '1 file' : files().length + ' files' }}</p>
+      <button type="button" class="textish" [disabled]="busy()" (click)="clear()">Clear</button>
+    </div>
+    <app-file-queue
+      [rows]="rows()"
+      [showPages]="true"
+      [dragDisabled]="busy()"
+      (removed)="remove($event)"
+      (moved)="move($event)"
+      (reordered)="reorder($event)"
+      (pagesChanged)="setPages($event)"
+    />
+  }
+
+  <app-action-bar
+    label="Download merged PDF"
+    extension=".pdf"
+    fallback="merged.pdf"
+    [busy]="busy()"
+    [disabled]="!canRun()"
+    [progress]="progress()"
+    [hint]="hint()"
+    (requested)="run($event)"
+  />
+
+  @if (error()) {
+    <p class="alert" role="alert">{{ error() }}</p>
+  }
+  @if (ready(); as file) {
+    <a class="save-link" [href]="file.url" [download]="file.name">Save {{ file.name }} again</a>
+  }
+</section>
