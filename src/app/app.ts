@@ -17,7 +17,7 @@ export class App {
   readonly tools: readonly ToolLink[] = [
     { path: '/merge', index: '01', name: 'Merge PDFs', detail: 'One file from many' },
     { path: '/split', index: '02', name: 'Split PDF', detail: 'Pages, ranges, extracts' },
-    { path: '/images', index: '03', name: 'Images to PDF', detail: 'JPEG and TIFF' },
+    { path: '/images', index: '03', name: 'Images to PDF', detail: 'JPEG, PNG, and TIFF' },
     { path: '/tiff', index: '04', name: 'Combine TIFFs', detail: 'Multi-page TIFF' },
   ];
 }

@@ -6,9 +6,9 @@ import { pdfPagesFromFiles } from '../core/image-pages';
 import { moveById, reorderById } from '../core/list';
 import { fileStem, formatBytes, formatPages } from '../core/names';
 import { imagesToPdf, type PaperSize } from '../core/pdf-tools';
-import { IMAGE_ACCEPT } from '../core/sniff';
+import { IMAGE_PDF_ACCEPT } from '../core/sniff';
 import { decodeTiffPages } from '../core/tiff';
-import { jpegThumbUrl, rasterDataUrl, releaseDocuments } from '../core/thumbs';
+import { imageThumbUrl, rasterDataUrl, releaseDocuments } from '../core/thumbs';
 import { ActionBar } from '../ui/action-bar';
 import { DropZone } from '../ui/drop-zone';
 import { FileQueue, type QueueRow } from '../ui/file-queue';
@@ -20,7 +20,7 @@ import { Segmented, type SegmentOption } from '../ui/segmented';
   templateUrl: './images-to-pdf.html',
 })
 export class ImagesToPdf {
-  readonly accept = IMAGE_ACCEPT;
+  readonly accept = IMAGE_PDF_ACCEPT;
   readonly papers: readonly SegmentOption[] = [
     { id: 'a4', label: 'A4' },
     { id: 'letter', label: 'US Letter' },
@@ -48,7 +48,9 @@ export class ImagesToPdf {
   readonly canRun = computed(() => this.files().length > 0);
 
   readonly hint = computed(() => {
-    if (!this.files().length) return 'Each JPEG is one page. Every page inside a TIFF is included.';
+    if (!this.files().length) {
+      return 'Each JPEG or PNG is one page. Every page inside a TIFF is included.';
+    }
     const heavy = this.files().reduce((sum, file) => sum + file.size, 0) > 80 * 1024 * 1024;
     const size =
       this.paper() === 'original'
@@ -68,7 +70,7 @@ export class ImagesToPdf {
     if (this.busy()) return;
     this.error.set('');
     this.busy.set(true);
-    const { documents, errors } = await ingestFiles(incoming, ['jpeg', 'tiff'], {
+    const { documents, errors } = await ingestFiles(incoming, ['jpeg', 'png', 'tiff'], {
       onProgress: (message) => this.progress.set(message),
       decorate: (document) => this.decorate(document),
     });
@@ -124,7 +126,10 @@ export class ImagesToPdf {
   }
 
   private async decorate(document: LoadedDocument): Promise<LoadedDocument> {
-    if (document.kind === 'jpeg') return { ...document, thumbUrl: jpegThumbUrl(document.bytes) };
+    if (document.kind === 'jpeg' || document.kind === 'png') {
+      const mime = document.kind === 'png' ? 'image/png' : 'image/jpeg';
+      return { ...document, thumbUrl: imageThumbUrl(document.bytes, mime) };
+    }
     if (document.kind !== 'tiff' || !document.width || !document.height) return document;
     if (document.width * document.height > 2_000_000) return document;
     try {

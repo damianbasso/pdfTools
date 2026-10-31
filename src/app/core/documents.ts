@@ -21,6 +21,7 @@ export interface LoadedDocument {
 export function kindLabel(kind: DocumentKind): string {
   if (kind === 'pdf') return 'PDF';
   if (kind === 'jpeg') return 'JPEG';
+  if (kind === 'png') return 'PNG';
   return 'TIFF';
 }
 
@@ -49,7 +50,7 @@ export async function inspectDocument(
     return documentFrom(file, bytes, kind, pageCount);
   }
 
-  if (kind === 'jpeg') return documentFrom(file, bytes, kind, 1);
+  if (kind === 'jpeg' || kind === 'png') return documentFrom(file, bytes, kind, 1);
 
   try {
     const summary = tiffSummary(bytes);
@@ -114,9 +115,7 @@ function documentFrom(
 }
 
 function describeAllowed(allowed: readonly DocumentKind[]): string {
-  const labels = allowed.map((kind) =>
-    kind === 'pdf' ? 'PDF' : kind === 'jpeg' ? 'JPEG' : 'TIFF',
-  );
+  const labels = allowed.map(kindLabel);
   if (labels.length <= 1) return `${labels[0] ?? 'supported'} file`;
   if (labels.length === 2) return `${labels[0]} or ${labels[1]} file`;
   return `${labels.slice(0, -1).join(', ')}, or ${labels[labels.length - 1]} file`;

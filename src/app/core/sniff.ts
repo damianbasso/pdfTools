@@ -1,11 +1,13 @@
-export type DocumentKind = 'pdf' | 'jpeg' | 'tiff';
+export type DocumentKind = 'pdf' | 'jpeg' | 'png' | 'tiff';
 
 export const PDF_ACCEPT = '.pdf,application/pdf';
 export const IMAGE_ACCEPT = '.jpg,.jpeg,.tif,.tiff,image/jpeg,image/tiff';
+export const IMAGE_PDF_ACCEPT = '.jpg,.jpeg,.png,.tif,.tiff,image/jpeg,image/png,image/tiff';
 
 export function sniffDocument(data: Uint8Array): DocumentKind | 'bigtiff' | null {
   if (isPdf(data)) return 'pdf';
   if (isJpeg(data)) return 'jpeg';
+  if (isPng(data)) return 'png';
   if (isBigTiff(data)) return 'bigtiff';
   if (isTiff(data)) return 'tiff';
   return null;
@@ -28,6 +30,20 @@ export function isPdf(data: Uint8Array): boolean {
 
 export function isJpeg(data: Uint8Array): boolean {
   return data.length > 3 && data[0] === 0xff && data[1] === 0xd8 && data[2] === 0xff;
+}
+
+export function isPng(data: Uint8Array): boolean {
+  return (
+    data.length > 7 &&
+    data[0] === 0x89 &&
+    data[1] === 0x50 &&
+    data[2] === 0x4e &&
+    data[3] === 0x47 &&
+    data[4] === 0x0d &&
+    data[5] === 0x0a &&
+    data[6] === 0x1a &&
+    data[7] === 0x0a
+  );
 }
 
 export function isTiff(data: Uint8Array): boolean {

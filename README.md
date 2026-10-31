@@ -1,6 +1,6 @@
 # pdfTools
 
-A local file editor for PDFs and scans. Merge and split PDFs, turn JPEG and TIFF files into one PDF, and combine separate TIFFs into a multi-page TIFF.
+A local file editor for PDFs and scans. Merge and split PDFs, turn JPEG, PNG, and TIFF files into one PDF, and combine separate TIFFs into a multi-page TIFF.
 
 Everything runs in the browser. Files are not uploaded.
 
@@ -8,7 +8,7 @@ Everything runs in the browser. Files are not uploaded.
 
 - **Merge PDFs.** Put documents in order, optionally keep only some pages from each file, and save one PDF.
 - **Split a PDF.** Save every page separately, cut ranges such as `1-3, 4-6`, or pick pages for a new PDF. Several outputs download as a zip.
-- **Images to PDF.** JPEG and TIFF files become one PDF. Each TIFF page is its own PDF page. Page size can be A4, US Letter, or the image's own size.
+- **Images to PDF.** JPEG, PNG, and TIFF files become one PDF. Each JPEG or PNG is one page, and each TIFF page is its own PDF page. Page size can be A4, US Letter, or the image's own size. PNG files are embedded as-is.
 - **Combine TIFFs.** Separate TIFF files are written as one multi-page TIFF. JPEG files can be mixed in as extra pages.
 
 ## Privacy

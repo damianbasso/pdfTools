@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isBigTiff, isJpeg, isPdf, isTiff, sniffDocument } from './sniff';
+import { isBigTiff, isJpeg, isPdf, isPng, isTiff, sniffDocument } from './sniff';
 
 describe('sniffDocument', () => {
   it('recognizes PDF bytes even with a short preamble', () => {
@@ -10,12 +10,15 @@ describe('sniffDocument', () => {
 
   it('recognizes JPEG and TIFF headers', () => {
     const jpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xe0]);
+    const png = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
     const tiff = new Uint8Array([0x49, 0x49, 0x2a, 0x00]);
     const big = new Uint8Array([0x4d, 0x4d, 0x00, 0x2b]);
     expect(isJpeg(jpeg)).toBe(true);
+    expect(isPng(png)).toBe(true);
     expect(isTiff(tiff)).toBe(true);
     expect(isBigTiff(big)).toBe(true);
     expect(sniffDocument(jpeg)).toBe('jpeg');
+    expect(sniffDocument(png)).toBe('png');
     expect(sniffDocument(tiff)).toBe('tiff');
     expect(sniffDocument(big)).toBe('bigtiff');
     expect(sniffDocument(new Uint8Array([1, 2, 3, 4]))).toBeNull();

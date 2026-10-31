@@ -8,17 +8,25 @@ export function releaseDocuments(files: readonly { thumbUrl?: string }[]): void 
   for (const file of files) revokeThumb(file.thumbUrl);
 }
 
-export function jpegThumbUrl(bytes: Uint8Array): string {
-  return URL.createObjectURL(new Blob([bytes.slice()], { type: 'image/jpeg' }));
+export function imageThumbUrl(bytes: Uint8Array, mime: string): string {
+  return URL.createObjectURL(new Blob([bytes.slice()], { type: mime }));
 }
 
-export async function decodeBrowserImage(bytes: Uint8Array): Promise<RasterPage> {
-  const blob = new Blob([bytes.slice()], { type: 'image/jpeg' });
+export function jpegThumbUrl(bytes: Uint8Array): string {
+  return imageThumbUrl(bytes, 'image/jpeg');
+}
+
+export async function decodeBrowserImage(
+  bytes: Uint8Array,
+  mime = 'image/jpeg',
+): Promise<RasterPage> {
+  const blob = new Blob([bytes.slice()], { type: mime });
   let bitmap: ImageBitmap;
   try {
     bitmap = await createImageBitmap(blob);
   } catch {
-    throw new Error('Could not decode this JPEG.');
+    const label = mime === 'image/png' ? 'PNG' : 'JPEG';
+    throw new Error(`Could not decode this ${label}.`);
   }
 
   try {

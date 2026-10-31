@@ -3,6 +3,7 @@ import { yieldThread } from './async';
 import { describeError } from './errors';
 import type { LoadedDocument } from './documents';
 import { jpegNeedsRaster, readJpegDpi } from './jpeg-info';
+import { readPngDpi } from './png-info';
 import { rasterToPdfPage, type PdfImagePage } from './pdf-tools';
 import type { RasterPage } from './raster';
 import { decodeBrowserImage } from './thumbs';
@@ -37,6 +38,8 @@ export async function pdfPagesFromFiles(files: readonly LoadedDocument[]): Promi
         pages.push(...decodeTiffPages(file.bytes).map(rasterToPdfPage));
       } else if (file.kind === 'jpeg') {
         pages.push(await jpegPdfPage(file.bytes));
+      } else if (file.kind === 'png') {
+        pages.push(await pngPdfPage(file.bytes));
       }
     } catch (error) {
       throw new Error(`${file.name}: ${describeError(error)}`);
@@ -64,6 +67,31 @@ async function jpegPdfPage(bytes: Uint8Array): Promise<PdfImagePage> {
     }
   }
   const raster = await decodeBrowserImage(bytes);
+  return {
+    width: raster.width,
+    height: raster.height,
+    dpiX: dpi?.x,
+    dpiY: dpi?.y,
+    source: { kind: 'rgba', rgba: raster.rgba },
+  };
+}
+
+async function pngPdfPage(bytes: Uint8Array): Promise<PdfImagePage> {
+  const dpi = readPngDpi(bytes);
+  try {
+    const probe = await PDFDocument.create();
+    const image = await probe.embedPng(bytes);
+    return {
+      width: image.width,
+      height: image.height,
+      dpiX: dpi?.x,
+      dpiY: dpi?.y,
+      source: { kind: 'png', data: bytes },
+    };
+  } catch {
+    // Interlaced and some deep PNGs cannot be embedded. A raster copy still prints.
+  }
+  const raster = await decodeBrowserImage(bytes, 'image/png');
   return {
     width: raster.width,
     height: raster.height,

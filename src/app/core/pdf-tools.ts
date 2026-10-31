@@ -11,7 +11,9 @@ export interface PdfMergeInput {
 }
 
 export type PdfImageSource =
-  { kind: 'jpeg'; data: Uint8Array } | { kind: 'rgba'; rgba: Uint8Array };
+  | { kind: 'jpeg'; data: Uint8Array }
+  | { kind: 'png'; data: Uint8Array }
+  | { kind: 'rgba'; rgba: Uint8Array };
 
 export interface PdfImagePage {
   width: number;
@@ -145,9 +147,12 @@ export async function imagesToPdf(
     const embedded =
       page.source.kind === 'jpeg'
         ? await pdf.embedJpg(page.source.data)
-        : await pdf.embedPng(pngFromRgba(page));
-    const pixelWidth = page.source.kind === 'jpeg' ? embedded.width : page.width;
-    const pixelHeight = page.source.kind === 'jpeg' ? embedded.height : page.height;
+        : page.source.kind === 'png'
+          ? await pdf.embedPng(page.source.data)
+          : await pdf.embedPng(pngFromRgba(page));
+    const embeddedSize = page.source.kind === 'jpeg' || page.source.kind === 'png';
+    const pixelWidth = embeddedSize ? embedded.width : page.width;
+    const pixelHeight = embeddedSize ? embedded.height : page.height;
     const placement = placeImage(pixelWidth, pixelHeight, options.paper, page.dpiX, page.dpiY);
     const pdfPage = pdf.addPage([placement.pageWidth, placement.pageHeight]);
     pdfPage.drawImage(embedded, {

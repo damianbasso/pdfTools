@@ -1,7 +1,10 @@
+import { encode as encodePng } from 'fast-png';
 import { encode as encodeJpeg } from 'jpeg-js';
 import { PDFDocument } from 'pdf-lib';
 import { describe, expect, it } from 'vitest';
+import { pdfPagesFromFiles } from './image-pages';
 import { imagesToPdf, mergePdfFiles, placeImage, splitPdf } from './pdf-tools';
+import type { LoadedDocument } from './documents';
 
 async function pdfWithWidths(widths: number[]): Promise<Uint8Array> {
   const pdf = await PDFDocument.create();
@@ -71,4 +74,49 @@ describe('pdf tools', () => {
     expect(pdf.getPageCount()).toBe(1);
     expect(pdf.getPage(0).getWidth()).toBeCloseTo(2, 2);
   });
+
+  it('embeds PNG files in order and uses their print density', async () => {
+    const first = encodePng({
+      width: 4,
+      height: 2,
+      data: new Uint8Array(4 * 2 * 3).fill(20),
+      depth: 8,
+      channels: 3,
+    });
+    const second = encodePng({
+      width: 2,
+      height: 6,
+      data: new Uint8Array(2 * 6 * 4).fill(255),
+      depth: 8,
+      channels: 4,
+    });
+    const pages = await pdfPagesFromFiles([
+      pngDocument('wide.png', first),
+      pngDocument('tall.png', second),
+    ]);
+    expect(pages.map((page) => page.source.kind)).toEqual(['png', 'png']);
+    expect(pages[0]).toMatchObject({ width: 4, height: 2 });
+    expect(pages[1]).toMatchObject({ width: 2, height: 6 });
+
+    const pdfBytes = await imagesToPdf(
+      pages.map((page, index) => ({ ...page, dpiX: index === 0 ? 144 : undefined })),
+      { paper: 'original' },
+    );
+    const pdf = await PDFDocument.load(pdfBytes);
+    expect(pdf.getPageCount()).toBe(2);
+    expect(pdf.getPage(0).getWidth()).toBeCloseTo(2, 2);
+    expect(pdf.getPage(1).getHeight()).toBeCloseTo(6, 2);
+  });
 });
+
+function pngDocument(name: string, bytes: Uint8Array): LoadedDocument {
+  return {
+    id: name,
+    name,
+    size: bytes.length,
+    kind: 'png',
+    bytes,
+    pageCount: 1,
+    pages: '',
+  };
+}
