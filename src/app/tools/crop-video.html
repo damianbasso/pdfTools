@@ -1,0 +1,94 @@
+<section class="tool" [attr.aria-busy]="busy() || measuring()">
+  <header class="tool-head">
+    <h1>Crop video</h1>
+    <p class="lead">
+      Remove straight black bars from an H.264 or HEVC video. The cropped picture matches the
+      original pixels, and the audio is copied. A phone clip padded into a landscape frame keeps the
+      picture inside the bars.
+    </p>
+  </header>
+
+  <app-drop-zone
+    [accept]="accept"
+    [multiple]="false"
+    title="Drop an MP4 or MOV"
+    hint="H.264 and HEVC only. The file never leaves this browser"
+    [disabled]="busy() || measuring()"
+    (chosen)="add($event)"
+  />
+
+  @if (file(); as current) {
+    <div class="queue-head">
+      <p>{{ current.name }} · {{ sizeLabel(current) }}</p>
+      <button type="button" class="textish" [disabled]="busy() || measuring()" (click)="clear()">
+        Clear
+      </button>
+    </div>
+    <div class="film">
+      <video #player [src]="url()" playsinline [controls]="measured()"></video>
+      @if (shades(); as shade) {
+        <div class="shade left" [style.width.%]="shade.left"></div>
+        <div class="shade right" [style.width.%]="shade.right"></div>
+        <div
+          class="shade top"
+          [style.height.%]="shade.top"
+          [style.left.%]="shade.left"
+          [style.right.%]="shade.right"
+        ></div>
+        <div
+          class="shade bottom"
+          [style.height.%]="shade.bottom"
+          [style.left.%]="shade.left"
+          [style.right.%]="shade.right"
+        ></div>
+      }
+    </div>
+
+    <div class="margin-grid">
+      @for (side of sides; track side.id) {
+        <label class="name-field">
+          <span>{{ side.label }}</span>
+          <input
+            type="number"
+            min="0"
+            step="2"
+            [value]="margin(side.id)"
+            [disabled]="busy() || measuring()"
+            (input)="setMargin(side.id, $event)"
+          />
+        </label>
+      }
+    </div>
+
+    <label class="name-field">
+      <span>Black level {{ threshold() }}</span>
+      <input
+        type="range"
+        min="0"
+        max="80"
+        step="1"
+        [value]="threshold()"
+        [disabled]="busy() || measuring()"
+        (input)="setThreshold($event)"
+      />
+    </label>
+  }
+
+  <app-action-bar
+    label="Download cropped video"
+    extension=".mp4"
+    [fallback]="fallback()"
+    [busy]="busy()"
+    [disabled]="!canRun()"
+    [progress]="progress()"
+    [hint]="hint()"
+    (requested)="run($event)"
+  />
+
+  @if (error() || problem()) {
+    <p class="alert" role="alert">{{ error() || problem() }}</p>
+  }
+  @if (ready(); as saved) {
+    <a class="save-link" [href]="saved.url" [download]="saved.name">Save {{ saved.name }} again</a>
+  }
+</section>

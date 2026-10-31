@@ -1,4 +1,4 @@
-const KNOWN_EXTENSION = /\.(pdf|tif|tiff|zip|jpe?g)$/i;
+const KNOWN_EXTENSION = /\.(pdf|tiff?|zip|jpe?g|png|mp4|mov|m4v)$/i;
 
 export function formatBytes(size: number): string {
   if (!Number.isFinite(size) || size < 0) return '';

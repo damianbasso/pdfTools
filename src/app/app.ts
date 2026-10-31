@@ -19,5 +19,6 @@ export class App {
     { path: '/split', index: '02', name: 'Split PDF', detail: 'Pages, ranges, extracts' },
     { path: '/images', index: '03', name: 'Images to PDF', detail: 'JPEG, PNG, and TIFF' },
     { path: '/tiff', index: '04', name: 'Combine TIFFs', detail: 'Multi-page TIFF' },
+    { path: '/crop', index: '05', name: 'Crop video', detail: 'Black bars, no quality loss' },
   ];
 }

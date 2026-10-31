@@ -49,11 +49,19 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "*.js",
+                "input": "node_modules/@ffmpeg/ffmpeg/dist/esm",
+                "output": "ffmpeg"
+              },
+              {
+                "glob": "ffmpeg-core.*",
+                "input": "node_modules/@ffmpeg/core/dist/esm",
+                "output": "ffmpeg"
               }
             ],
-            "styles": [
-              "src/styles.scss"
-            ],
+            "styles": ["src/styles.scss"],
             "allowedCommonJsDependencies": ["utif", "pako"]
           },
           "configurations": {

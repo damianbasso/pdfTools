@@ -21,6 +21,7 @@ describe('file names', () => {
     expect(downloadName('report.pdf', '.zip', 'split.zip')).toBe('report.zip');
     expect(downloadName('bad:/name', '.tif', 'combined.tif')).toBe('badname.tif');
     expect(downloadName('   ', '.pdf', 'merged.pdf')).toBe('merged.pdf');
+    expect(downloadName('clip.mov', '.mp4', 'cropped.mp4')).toBe('clip.mp4');
     expect(fileStem('scans\\page.tiff')).toBe('page');
   });
 

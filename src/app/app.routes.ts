@@ -22,5 +22,10 @@ export const routes: Routes = [
     title: 'Combine TIFFs · pdfTools',
     loadComponent: () => import('./tools/combine-tiff').then((module) => module.CombineTiff),
   },
+  {
+    path: 'crop',
+    title: 'Crop video · pdfTools',
+    loadComponent: () => import('./tools/crop-video').then((module) => module.CropVideo),
+  },
   { path: '**', redirectTo: 'merge' },
 ];
